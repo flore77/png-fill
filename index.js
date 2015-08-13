@@ -1,6 +1,22 @@
 var PNG = require('pngjs2').PNG;
 
 /**
+ * Transforms the source into a ReadStream
+ *
+ * @param {String|Stream|Buffer} source
+ * @param {streamifyCb} callback
+ */
+function streamify(source, callback) {
+
+}
+
+/**
+ * @callback streamifyCb
+ * @param error
+ * @param Stream
+ */
+
+/**
  *
  * @param {String|Stream|Buffer} source - The source image
  * @param {Object} options
