@@ -1,0 +1,26 @@
+{
+  "name": "png-fill",
+  "version": "0.0.0",
+  "description": "A light pure JS PNG colorizer",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flore77/png-fill.git"
+  },
+  "keywords": [
+    "png",
+    "fill",
+    "color",
+    "colorizer",
+    "pixel"
+  ],
+  "author": "Simion Florentin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flore77/png-fill/issues"
+  },
+  "homepage": "https://github.com/flore77/png-fill#readme"
+}
