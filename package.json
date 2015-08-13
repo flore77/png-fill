@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/flore77/png-fill/issues"
   },
-  "homepage": "https://github.com/flore77/png-fill#readme"
+  "homepage": "https://github.com/flore77/png-fill#readme",
+  "dependencies": {
+    "pngjs2": "^1.0.0"
+  }
 }
