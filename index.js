@@ -1,20 +1,6 @@
 var PNG = require('pngjs2').PNG;
-
-/**
- * Transforms the source into a ReadStream
- *
- * @param {String|Stream|Buffer} source
- * @param {streamifyCb} callback
- */
-function streamify(source, callback) {
-
-}
-
-/**
- * @callback streamifyCb
- * @param error
- * @param Stream
- */
+var streamifier = require('stream-converter');
+var fs = require('fs');
 
 /**
  *
@@ -32,7 +18,7 @@ function streamify(source, callback) {
  * @param {fillCb} callback
  */
 module.exports.fill = function(source, options, callback) {
-
+  var png = streamify(source).pipe(new PNG());
 };
 
 /**

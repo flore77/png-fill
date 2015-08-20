@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/flore77/png-fill#readme",
   "dependencies": {
-    "pngjs2": "^1.0.0"
-  }
+    "pngjs2": "^1.0.0",
+    "stream-converter": "0.0.1"
+  },
+  "devDependencies": {}
 }
