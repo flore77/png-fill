@@ -1,4 +1,6 @@
 var PNG = require('pngjs2').PNG;
+var streamifier = require('stream-converter');
+var fs = require('fs');
 
 /**
  *
@@ -16,7 +18,7 @@ var PNG = require('pngjs2').PNG;
  * @param {fillCb} callback
  */
 module.exports.fill = function(source, options, callback) {
-
+  var png = streamify(source).pipe(new PNG());
 };
 
 /**
