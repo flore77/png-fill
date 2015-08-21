@@ -1,6 +1,33 @@
 var PNG = require('pngjs2').PNG;
-var streamifier = require('stream-converter');
-var fs = require('fs');
+var streamify = require('stream-converter');
+
+/*
+ * Calculates the coord of the rectangle margins
+ *
+ * @param {Object} options.rect - Sama as DOMRect
+ */
+function getCoord(rect) {
+  if (rect === undefined) {
+    throw new Error('You have not provided the rect property');
+  }
+
+  var coord = {
+    top: rect.top,
+    left: rect.left,
+    bottom: rect.bottom || rect.top + rect.height,
+    right: rect.right || rect.left + rect.width
+  };
+
+  var prop = null;
+
+  for (prop in coord) {
+    if (coord[prop] === undefined) {
+      throw new Error('Not enough rect properties to define rectangle coord');
+    }
+  }
+
+  return coord;
+}
 
 /**
  *
@@ -17,8 +44,30 @@ var fs = require('fs');
  * @param {Number} [options.rect.height]
  * @param {fillCb} callback
  */
-module.exports.fill = function(source, options, callback) {
-  var png = streamify(source).pipe(new PNG());
+module.exports  = function(source, options, callback) {
+
+  if (source === undefined) {
+    throw new Error('You have not provided any source');
+  }
+
+  if (options === undefined) {
+    throw new Error('You have not provided any options');
+  }
+
+  if (typeof options !== 'object' || options instanceof Array) {
+    throw new Error('The provided options param is not an object');
+  }
+
+  if (callback === undefined) {
+    throw new Error('You have not provided any callback');
+  }
+
+  if (typeof callback !== 'function') {
+    throw new Error('The provided callback is not a function');
+  }
+
+  var png = streamify(source, {path: true}).pipe(new PNG());
+  var coord = getCoord(options.rect);
 };
 
 /**
