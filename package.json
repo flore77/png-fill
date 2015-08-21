@@ -4,7 +4,8 @@
   "description": "A light pure JS PNG colorizer",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "linter": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -27,5 +28,7 @@
     "pngjs2": "^1.0.0",
     "stream-converter": "0.0.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^1.2.1"
+  }
 }
