@@ -133,8 +133,8 @@ module.exports = function(source, options, callback) {
               'the image'));
     }
 
-    for (var y = coord.top; y < height; y++) {
-      for (var x = coord.left; x < width; x++) {
+    for (var y = coord.top; y <= height; y++) {
+      for (var x = coord.left; x <= width; x++) {
         var index = (this.width * y + x) << 2;
 
         this.data[index] = color.R;

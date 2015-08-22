@@ -1,8 +1,21 @@
 var expect = require('chai').expect;
+var looksSame = require('looks-same');
 var PNGFill = require('../index.js');
+var fs = require('fs');
+var path = require('path');
 
 describe('png-fill', function() {
-  var source = new Buffer('anything'),
+  var source = fs.readFileSync(path.join(__dirname, 'test.png')),
+      baseline = fs.readFileSync(path.join(__dirname, 'rect.png')),
+      options = {
+        output: 'buffer',
+        rect: {
+          top: 100,
+          left: 200,
+          width: 200,
+          height: 100
+        }
+      },
       callback = function() {};
 
   describe('Parameters checking', function() {
@@ -45,6 +58,79 @@ describe('png-fill', function() {
           };
 
       expect(PNGFill.bind(null, source, options, callback)).to.throw(Error);
+    });
+  });
+
+  describe('Fill', function() {
+    it('should fill the image with right and bottom params', function(done) {
+      var rect = {
+        left: 200,
+        top: 100,
+        right: 400,
+        bottom: 200
+      };
+
+      var options = {
+        rect: rect,
+        output: 'buffer'
+      };
+
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.be.null;
+
+        looksSame(baseline, data, function(error, equal) {
+          if (error) {
+            throw error;
+          }
+
+          expect(equal).to.be.true;
+          done();
+        });
+      });
+    });
+
+    it('should fill the image with width and height params', function(done) {
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.be.null;
+
+        looksSame(baseline, data, function(error, equal) {
+          if (error) {
+            throw error;
+          }
+
+          expect(equal).to.be.true;
+          done();
+        });
+      });
+    });
+
+    it('should throw an error if left and top params are outside the image',
+       function(done) {
+      var rect = {
+        left: 501,
+        top: 100,
+        right: 400,
+        bottom: 200
+      };
+
+      var options = {
+        rect: rect,
+        output: 'buffer'
+      };
+
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.not.be.null;
+        expect(data).to.be.undefined;
+      });
+
+      rect.left = 200;
+      rect.top = 400;
+
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.not.be.null;
+        expect(data).to.be.undefined;
+        done();
+      });
     });
   });
 });
