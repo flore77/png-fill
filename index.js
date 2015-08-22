@@ -1,5 +1,6 @@
 var PNG = require('pngjs2').PNG;
 var streamify = require('stream-converter');
+var parseColor = require('parse-color');
 
 /*
  * Calculates the coord of the rectangle margins
@@ -30,6 +31,26 @@ function getCoord(rect) {
 }
 
 /**
+ * Parse a color from string to RGB
+ *
+ * @param {String} color - A css color
+ */
+function parseColorToRGB(color) {
+  if (color === undefined) {
+    color = 'black';
+  }
+
+  var parsedColor = parseColor(color);
+
+  return {
+    R: parsedColor.rgb[0],
+    G: parsedColor.rgb[1],
+    B: parsedColor.rgb[2]
+  };
+}
+
+
+/**
  *
  * @param {String|Stream|Buffer} source - The source image
  * @param {Object} options
@@ -44,7 +65,7 @@ function getCoord(rect) {
  * @param {Number} [options.rect.height]
  * @param {fillCb} callback
  */
-module.exports  = function(source, options, callback) {
+module.exports = function(source, options, callback) {
 
   if (source === undefined) {
     throw new Error('You have not provided any source');
@@ -68,6 +89,7 @@ module.exports  = function(source, options, callback) {
 
   var png = streamify(source, {path: true}).pipe(new PNG());
   var coord = getCoord(options.rect);
+  var color = parseColorToRGB(options.color);
 };
 
 /**
