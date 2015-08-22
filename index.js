@@ -1,11 +1,13 @@
 var PNG = require('pngjs2').PNG;
 var streamify = require('stream-converter');
 var parseColor = require('parse-color');
+var concat = require('concat-stream');
+var fs = require('fs');
 
 /*
  * Calculates the coord of the rectangle margins
  *
- * @param {Object} options.rect - Sama as DOMRect
+ * @param {Object} options.rect - Same as DOMRect
  */
 function getCoord(rect) {
   if (rect === undefined) {
@@ -49,6 +51,34 @@ function parseColorToRGB(color) {
   };
 }
 
+/**
+ * Returns the PNG under the specified format
+ *
+ * @param {Stream} png
+ * @param {String} format
+ * @param {String} path
+ * @param done
+ */
+function output(png, type, path, done) {
+  if (type === 'file') {
+    if (path === undefined) {
+      return done(new Error('There is no path to save the PNG image'));
+    }
+
+    png.pipe(fs.createWriteStream(path))
+      .on('error', done)
+      .on('close', done);
+  } else if (type === 'buffer') {
+    png.pipe(concat(function(data) {
+      done(null, data);
+    }));
+
+    png.on('error', done);
+  } else {
+    done(null, png);
+  }
+}
+
 
 /**
  *
@@ -90,6 +120,31 @@ module.exports = function(source, options, callback) {
   var png = streamify(source, {path: true}).pipe(new PNG());
   var coord = getCoord(options.rect);
   var color = parseColorToRGB(options.color);
+
+  png.on('error', callback);
+
+  png.on('parsed', function() {
+    var width = Math.min(coord.right, this.width);
+    var height = Math.min(coord.bottom, this.height);
+
+    if (coord.top < 0 || coord.top > height ||
+        coord.left < 0 || coord.left > width) {
+          return callback(new Error('The top or the left coord are outside ' +
+              'the image'));
+    }
+
+    for (var y = coord.top; y < height; y++) {
+      for (var x = coord.left; x < width; x++) {
+        var index = (this.width * y + x) << 2;
+
+        this.data[index] = color.R;
+        this.data[index + 1] = color.G;
+        this.data[index + 2] = color.B;
+      }
+    }
+
+    output(png.pack(), options.output, options.path, callback);
+  });
 };
 
 /**
