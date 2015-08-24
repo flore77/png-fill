@@ -124,8 +124,8 @@ module.exports = function(source, options, callback) {
   png.on('error', callback);
 
   png.on('parsed', function() {
-    var width = Math.min(coord.right, this.width);
-    var height = Math.min(coord.bottom, this.height);
+    var width = Math.min(coord.right, this.width - 1);
+    var height = Math.min(coord.bottom, this.height - 1);
 
     if (coord.top < 0 || coord.top > height ||
         coord.left < 0 || coord.left > width) {
