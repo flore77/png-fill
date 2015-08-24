@@ -67,7 +67,9 @@ function output(png, type, path, done) {
 
     png.pipe(fs.createWriteStream(path))
       .on('error', done)
-      .on('close', done);
+      .on('close', function() {
+        done(null);
+      });
   } else if (type === 'buffer') {
     png.pipe(concat(function(data) {
       done(null, data);
@@ -78,7 +80,6 @@ function output(png, type, path, done) {
     done(null, png);
   }
 }
-
 
 /**
  *
