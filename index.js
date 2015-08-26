@@ -9,11 +9,7 @@ var fs = require('fs');
  *
  * @param {Object} options.rect - Same as DOMRect
  */
-function getCoord(rect) {
-  if (rect === undefined) {
-    throw new Error('You have not provided the rect property');
-  }
-
+function getCoord(rect, done) {
   var coord = {
     top: rect.top,
     left: rect.left,
@@ -25,7 +21,8 @@ function getCoord(rect) {
 
   for (prop in coord) {
     if (coord[prop] === undefined) {
-      throw new Error('Not enough rect properties to define rectangle coord');
+      return done(new Error('Not enough rect properties to define ' +
+            'rectangle coord'));
     }
   }
 
@@ -110,6 +107,10 @@ module.exports = function(source, options, callback) {
     throw new Error('The provided options param is not an object');
   }
 
+  if (options.rect === undefined) {
+    throw new Error('You have not provided the rect property');
+  }
+
   if (callback === undefined) {
     throw new Error('You have not provided any callback');
   }
@@ -119,7 +120,7 @@ module.exports = function(source, options, callback) {
   }
 
   var png = streamify(source, {path: true}).pipe(new PNG());
-  var coord = getCoord(options.rect);
+  var coord = getCoord(options.rect, callback);
   var color = parseColorToRGB(options.color);
 
   png.on('error', callback);
