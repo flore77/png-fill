@@ -13,6 +13,7 @@ function cleanUp() {
 describe('png-fill', function() {
   var source = fs.readFileSync(path.join(__dirname, 'source.png')),
       baseline = fs.readFileSync(path.join(__dirname, 'rect.png')),
+      colorBaseline = fs.readFileSync(path.join(__dirname, 'rect-color.png')),
       options = {
         output: 'buffer',
         rect: null
@@ -53,11 +54,11 @@ describe('png-fill', function() {
     });
 
     it('should throw an error if no callback is provided', function() {
-      expect(PNGFill.bind(null, source, {})).to.throw(Error);
+      expect(PNGFill.bind(null, source, {rect: 'rect'})).to.throw(Error);
     });
 
     it('should throw an error if the callback is not a function', function() {
-      expect(PNGFill.bind(null, source, {}, {})).to.throw(Error);
+      expect(PNGFill.bind(null, source, {rect: 'rect'}, {})).to.throw(Error);
     });
   });
 
@@ -144,6 +145,23 @@ describe('png-fill', function() {
         expect(error).to.be.null;
 
         looksSame(baseline, data, function(error, equal) {
+          if (error) {
+            throw error;
+          }
+
+          expect(equal).to.be.true;
+          done();
+        });
+      });
+    });
+
+    it('should fill the image with the given color', function(done) {
+      options.color = '#0000FF';
+
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.be.null;
+
+        looksSame(colorBaseline, data, function(error, equal) {
           if (error) {
             throw error;
           }
