@@ -4,14 +4,14 @@ var PNGFill = require('../index.js');
 var fs = require('fs');
 var path = require('path');
 
-var pathImg = path.join(__dirname, 'img.png');
+var outputPath = path.join(__dirname, 'output.png');
 
 function cleanUp() {
-  fs.unlinkSync(pathImg);
+  fs.unlinkSync(outputPath);
 }
 
 describe('png-fill', function() {
-  var source = fs.readFileSync(path.join(__dirname, 'test.png')),
+  var source = fs.readFileSync(path.join(__dirname, 'source.png')),
       baseline = fs.readFileSync(path.join(__dirname, 'rect.png')),
       options = {
         output: 'buffer',
@@ -65,7 +65,7 @@ describe('png-fill', function() {
     it('should save the image on disk if the output options is set to file ' +
        'and a path is also provided', function(done) {
       options.output = 'file';
-      options.path = pathImg;
+      options.path = outputPath;
 
       PNGFill(source, options, function(error) {
         expect(error).to.be.null;
@@ -100,8 +100,8 @@ describe('png-fill', function() {
       PNGFill(source, options, function(error, stream) {
         expect(error).to.be.null;
 
-        stream.pipe(fs.createWriteStream(pathImg)).on('close', function() {
-          looksSame(baseline, pathImg, function(error, equal) {
+        stream.pipe(fs.createWriteStream(outputPath)).on('close', function() {
+          looksSame(baseline, outputPath, function(error, equal) {
             if (error) {
               throw error;
             }
