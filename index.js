@@ -9,7 +9,7 @@ var fs = require('fs');
  *
  * @param {Object} options.rect - Same as DOMRect
  */
-function getCoord(rect, done) {
+function getCoord(rect) {
   var coord = {
     top: rect.top,
     left: rect.left,
@@ -20,9 +20,8 @@ function getCoord(rect, done) {
   var prop = null;
 
   for (prop in coord) {
-    if (coord[prop] === undefined) {
-      return done(new Error('Not enough rect properties to define ' +
-            'rectangle coord'));
+    if (coord[prop] === undefined || isNaN(coord[prop])) {
+      return null;
     }
   }
 
@@ -119,8 +118,14 @@ module.exports = function(source, options, callback) {
     throw new Error('The provided callback is not a function');
   }
 
+  var coord = getCoord(options.rect);
+
+  if (coord === null) {
+    return callback(new Error('Not enough rect properties to calculate ' +
+      'rectangle coord'));
+  }
+
   var png = streamify(source, {path: true}).pipe(new PNG());
-  var coord = getCoord(options.rect, callback);
   var color = parseColorToRGB(options.color);
 
   png.on('error', callback);
@@ -131,8 +136,8 @@ module.exports = function(source, options, callback) {
 
     if (coord.top < 0 || coord.top > height ||
         coord.left < 0 || coord.left > width) {
-          return callback(new Error('The top or the left coord are outside ' +
-              'the image'));
+      return callback(new Error('The top or the left coord are outside ' +
+        'the image'));
     }
 
     for (var y = coord.top; y <= height; y++) {
