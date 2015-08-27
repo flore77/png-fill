@@ -4,10 +4,15 @@ var PNGFill = require('../index.js');
 var fs = require('fs');
 var path = require('path');
 
+var pathImg = path.join(__dirname, 'img.png');
+
+function cleanUp() {
+  fs.unlinkSync(pathImg);
+}
+
 describe('png-fill', function() {
   var source = fs.readFileSync(path.join(__dirname, 'test.png')),
       baseline = fs.readFileSync(path.join(__dirname, 'rect.png')),
-      pathImg = path.join(__dirname, 'img.png');
       options = {
         output: 'buffer',
         rect: null
@@ -17,11 +22,11 @@ describe('png-fill', function() {
   beforeEach(function() {
     options = {
       output: 'buffer',
-      rect:  {
-          top: 100,
-          left: 200,
-          width: 200,
-          height: 100
+      rect: {
+        top: 100,
+        left: 200,
+        width: 200,
+        height: 100
       }
     };
   });
@@ -56,8 +61,60 @@ describe('png-fill', function() {
     });
   });
 
-  describe('Rectangle Coord', function() {
-     });
+  describe('Output', function() {
+    it('should save the image on disk if the output options is set to file ' +
+       'and a path is also provided', function(done) {
+      options.output = 'file';
+      options.path = pathImg;
+
+      PNGFill(source, options, function(error) {
+        expect(error).to.be.null;
+
+        looksSame(baseline, options.path, function(error, equal) {
+          if (error) {
+            throw error;
+          }
+
+          expect(equal).to.be.true;
+
+          cleanUp();
+          done();
+        });
+      });
+    });
+
+    it('should return a buffer if the output options is set to buffer',
+       function(done) {
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.be.null;
+        expect(data).to.be.an.instanceof(Buffer);
+
+        done();
+      });
+    });
+
+    it('should return a stream if no output options is provided',
+       function(done) {
+      options.output = undefined;
+
+      PNGFill(source, options, function(error, stream) {
+        expect(error).to.be.null;
+
+        stream.pipe(fs.createWriteStream(pathImg)).on('close', function() {
+          looksSame(baseline, pathImg, function(error, equal) {
+            if (error) {
+              throw error;
+            }
+
+            expect(equal).to.be.true;
+
+            cleanUp();
+            done();
+          });
+        });
+      });
+    });
+  });
 
   describe('Fill', function() {
     it('should fill the image with right and bottom params', function(done) {
@@ -98,27 +155,9 @@ describe('png-fill', function() {
     });
   });
 
-  describe('Output', function() {
-    it('should save the image on disk if a path is provided', function(done) {
-      options.output = 'file';
-      options.path = pathImg;
-
-      PNGFill(source, options, function(error) {
-        expect(error).to.be.null;
-
-        looksSame(baseline, options.path, function(error, equal) {
-          if (error) {
-            throw error;
-          }
-
-          expect(equal).to.be.true;
-          done();
-        });
-      });
-    });
-
-
-    it('should call the cb with error if there is no path', function(done) {
+  describe('Call callabck with error', function() {
+    it('should call if there is no path and the output option is set to file',
+       function(done) {
       options.output = 'file';
 
       PNGFill(source, options, function(error, data) {
@@ -128,29 +167,7 @@ describe('png-fill', function() {
       });
     });
 
-   /* it('should return a stream if no output options is provided',
-       function(done) {
-      options.output = undefined;
-
-      PNGFill(source, options, function(error, stream) {
-        expect(error).to.be.null;
-
-        stream.pipe(fs.createWriteStream(pathImg));
-
-        looksSame(baseline, pathImg, function(error, equal) {
-          if (error) {
-            throw error;
-          }
-
-          expect(equal).to.be.true;
-          done();
-        });
-      });
-    });*/
-  });
-
-  describe('Call callabck with error', function() {
-    it('should call if the rectangle coord cannot be calculated',
+    it('should call if one of the rectangle coord is undefined',
        function(done) {
       options.rect = {
         top: 50
@@ -163,24 +180,16 @@ describe('png-fill', function() {
       });
     });
 
-    it('should call if top param is outside the image', function(done) {
-      options.rect.top = 400;
+    it('should call if one of the rectangle coord is NaN', function(done) {
+      options.rect = {
+        top: 50,
+        left: 75,
+        width: 500
+      };
 
       PNGFill(source, options, function(error, data) {
         expect(error).to.not.be.null;
         expect(data).to.be.undefined;
-
-        done();
-      });
-    });
-
-   it('should call if left param is neagtive', function(done) {
-      options.rect.left = -15;
-
-      PNGFill(source, options, function(error, data) {
-        expect(error).to.not.be.null;
-        expect(data).to.be.undefined;
-
         done();
       });
     });
@@ -196,9 +205,29 @@ describe('png-fill', function() {
       });
     });
 
+    it('should call if top param is outside the image', function(done) {
+      options.rect.top = 400;
 
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.not.be.null;
+        expect(data).to.be.undefined;
 
-   it('should call if top param is negative', function(done) {
+        done();
+      });
+    });
+
+    it('should call if left param is neagtive', function(done) {
+      options.rect.left = -15;
+
+      PNGFill(source, options, function(error, data) {
+        expect(error).to.not.be.null;
+        expect(data).to.be.undefined;
+
+        done();
+      });
+    });
+
+    it('should call if top param is negative', function(done) {
       options.rect.top = -1;
 
       PNGFill(source, options, function(error, data) {
@@ -208,9 +237,5 @@ describe('png-fill', function() {
         done();
       });
     });
-  });
-
-  after(function() {
-    fs.unlinkSync(pathImg);
   });
 });
